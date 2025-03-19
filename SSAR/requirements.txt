@@ -1,0 +1,4 @@
+numpy==2.2.4
+python_igraph==0.11.8
+torch==2.0.1
+transformers==4.46.1
