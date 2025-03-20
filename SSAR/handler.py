@@ -22,13 +22,15 @@ def handle_java(gt_file_path, directory_path):
 
 def handle_cpp(gt_file_path, directory_path):
     file_paths = []
+    relative_paths = []
     suffix = LANGUAGE_EXTENSIONS["C/C++"]
     gt_file = read_gt_file(gt_file_path)
 
     for path in Path(directory_path).rglob("*"):
         if path.is_file() and path.suffix in suffix:  # 只处理对应后缀名的文件
-            if gt_file is None or path.relative_to(directory_path).as_posix() in gt_file:  # 设置为linux风格的相对路径
+            relative_path = path.relative_to(directory_path).as_posix()
+            if gt_file is None or relative_path in gt_file:  # 设置为linux风格的相对路径
                 file_paths.append(path.resolve())  # 存储绝对路径
+                relative_paths.append(relative_path)  # 存储相对路径
 
-    relative_paths = [path.relative_to(directory_path).as_posix() for path in file_paths]
     return file_paths, relative_paths

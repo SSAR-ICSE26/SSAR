@@ -20,13 +20,15 @@ import torch
 from handler import handle_cpp, handle_java
 from util import detect_language
 from community import community_detection
-from pathlib import Path
+from pathlib import Path, PurePath
 from encoder import encode_file
 
 
 def arch_recovery(directory_path, dependency_file_path, gt_file_path, resolution):
     start_time = time.time()
-    project_name = Path(directory_path).name  # 获取项目名
+
+    directory_path = Path(directory_path).resolve()
+    project_name = directory_path.name  # 获取项目名
     project_language = detect_language(directory_path)[0]
 
     output_rsf_path = Path("result") / project_name / f"{project_name}.rsf"  # 聚类输出路径
@@ -55,7 +57,7 @@ def arch_recovery(directory_path, dependency_file_path, gt_file_path, resolution
 
     logging.info("Encoding files:")
     for index, absolute_path in enumerate(file_paths):
-        relative_path = str(absolute_path.relative_to(directory_path))
+        relative_path = absolute_path.relative_to(directory_path)
         file_paths_index[relative_path] = index
         embeddings_list.append(encode_file(absolute_path))  # 对文件编码
         # 输出进度
@@ -85,7 +87,7 @@ def arch_recovery(directory_path, dependency_file_path, gt_file_path, resolution
         reader = csv.reader(f)
         next(reader)  # 跳过标题行
         for row in reader:
-            dependency_list.append(row)
+            dependency_list.append([Path(row[0]), Path(row[1])])
 
     file_count = len(file_paths_index)  # 文件数
     dependency_count = 0  # 依赖数
@@ -143,16 +145,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.description = "SSAR: A Novel Software Architecture Recovery Approach Enhancing Accuracy and Scalability"
     parser.add_argument(
-        "-d",
-        "--dependency",
-        metavar='',
-        help="path to the dependency file"
-    )
-    parser.add_argument(
         "-g",
         "--gt",
         metavar='',
-        help="path to the ground_truth json file (if not provided, all code files in the project will be analyzed)"
+        help="path to the ground_truth .json file (if not provided, all code files in the project will be analyzed)"
     )
     parser.add_argument(
         "-r",
@@ -165,6 +161,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "projectpath",
         help="path to the project"
+    )
+    parser.add_argument(
+        "dependency",
+        help="path to the dependency .csv file"
     )
     args = parser.parse_args()
 
