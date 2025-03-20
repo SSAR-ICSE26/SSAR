@@ -4,7 +4,7 @@
 
 This is an architecture recovery tool that supports the following features:
 
-1. Enter the project directory, provide the dependencies .csv file and the ground_truth .json file, and the files listed in ground_truth will be analyzed.
+1. Input the project directory, provide the dependencies .csv file and the ground_truth .json file, and the files listed in ground_truth will be analyzed.
    - If the ground_truth file is not provided, all code files in the main language of the project will be analyzed.
 2. The user can specify the resolution (default 1.05) of community detection to control the number of clusters generated.
 
@@ -22,7 +22,7 @@ cd SSAR
 
 ### 2.2 Install requirements
 
-Install the requirements:
+Enter the SSAR directory, and install the requirements:
 
 ```
 cd SSAR
