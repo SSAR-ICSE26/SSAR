@@ -1,0 +1,7 @@
+SS(include/libxml/xmlwin32version.h.ss) = include/libxml/xmlwin32version.h, catalog.c, xpath.c, debugXML.c, HTMLtree.c, HTMLparser.c, DOCBparser.c, include/libxml/catalog.h, xmlcatalog.c, nanohttp.c, nanoftp.c, include/win32config.h, c14n.c, xmlregexp.c, xmlunicode.c, xmlschemastypes.c, libxml.h, xmlschemas.c
+SS(xmllint.c.ss) = include/libxml/debugXML.h, include/libxml/DOCBparser.h, xmllint.c, include/libxml/nanoftp.h, include/libxml/xinclude.h, python/libxml_wrap.h, include/libxml/nanohttp.h, include/libxml/HTMLtree.h, include/libxml/HTMLparser.h
+SS(parser.c.ss) = xlink.c, include/libxml/xmlmemory.h, include/libxml/globals.h, error.c, globals.c, include/libxml/parser.h, python/libxml.c, include/libxml/encoding.h, include/libxml/xmlIO.h, encoding.c, tree.c, entities.c, include/libxml/xmlerror.h, uri.c, parser.c, SAX.c, xmlIO.c, include/libxml/parserInternals.h, parserInternals.c, include/libxml/tree.h, include/libxml/entities.h, xinclude.c, include/libxml/uri.h, include/libxml/SAX.h, include/libxml/xlink.h
+SS(macos/src/config-mac.h.ss) = include/libxml/threads.h, threads.c, xmlmemory.c, macos/src/config-mac.h
+SS(valid.c.ss) = valid.c, include/libxml/valid.h, hash.c, include/libxml/hash.h, include/libxml/list.h, list.c
+SS(xpointer.c.ss) = include/libxml/c14n.h, include/libxml/xpath.h, python/types.c, xpointer.c, include/libxml/xpathInternals.h, include/libxml/xpointer.h
+SS(trio.c.ss) = trio.h, triop.h, trio.c, triostr.c, triostr.h, trionan.c, trionan.h, triodef.h
