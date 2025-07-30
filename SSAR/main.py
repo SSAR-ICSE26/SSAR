@@ -28,21 +28,21 @@ def arch_recovery(directory_path, dependency_file_path, gt_file_path, resolution
     start_time = time.time()
 
     directory_path = Path(directory_path).resolve()
-    project_name = directory_path.name  # 获取项目名
+    project_name = directory_path.name  # Get project name
     project_language = detect_language(directory_path)[0]
 
-    output_rsf_path = Path("result") / project_name / f"{project_name}.rsf"  # 聚类输出路径
+    output_rsf_path = Path("result") / project_name / f"{project_name}.rsf"  # Clustering output path
 
     logging.info(f"Start Architecture Recovering for: {project_name} [language: {project_language}]")
 
-    embeddings_list = []  # 文件编码
-    file_paths_index = {}  # 文件字典 文件名：索引
+    embeddings_list = []  # File encodings
+    file_paths_index = {}  # File dictionary: filename -> index
 
     HANDLERS = {
         "Java": handle_java,
         "C/C++": handle_cpp
     }
-    # 选择对应的语言处理器
+    # Select corresponding language handler
     if project_language in HANDLERS:
         file_paths, final_paths = HANDLERS[project_language](gt_file_path, directory_path)
     else:
@@ -59,8 +59,8 @@ def arch_recovery(directory_path, dependency_file_path, gt_file_path, resolution
     for index, absolute_path in enumerate(file_paths):
         relative_path = absolute_path.relative_to(directory_path)
         file_paths_index[relative_path] = index
-        embeddings_list.append(encode_file(absolute_path))  # 对文件编码
-        # 输出进度
+        embeddings_list.append(encode_file(absolute_path))  # Encode the file
+        # Output progress
         progress = (index + 1) / total_files * 100
 
         print(f"\r{progress:.2f}% ({index + 1}/{total_files})", end="")
@@ -72,11 +72,11 @@ def arch_recovery(directory_path, dependency_file_path, gt_file_path, resolution
 
 
     logging.info("---Calculating similarity matrix...")
-    embeddings_matrix = torch.stack(embeddings_list)  # 将嵌入转换为一个大矩阵，形状为 (num_files, embedding_dim)
-    norm_embeddings = torch.nn.functional.normalize(embeddings_matrix, p=2, dim=1)  # 归一化嵌入矩阵
+    embeddings_matrix = torch.stack(embeddings_list)  # Convert embeddings into a large matrix of shape (num_files, embedding_dim)
+    norm_embeddings = torch.nn.functional.normalize(embeddings_matrix, p=2, dim=1)  # Normalize embedding matrix
 
     similarity_matrix = (torch.mm(norm_embeddings, norm_embeddings.t()) + 1) / 2 * 0.5  # (1 + cos) / 2 * 0.5
-    similarity_matrix = similarity_matrix.detach().cpu().numpy()  # 将相似度矩阵转换为 numpy 数组
+    similarity_matrix = similarity_matrix.detach().cpu().numpy()  # Convert similarity matrix to numpy array
     similarity_matrix = np.around(similarity_matrix, decimals=4)
 
 
@@ -85,21 +85,21 @@ def arch_recovery(directory_path, dependency_file_path, gt_file_path, resolution
     dependency_list = []
     with open(dependency_file_path, 'r') as f:
         reader = csv.reader(f)
-        next(reader)  # 跳过标题行
+        next(reader)  # Skip header row
         for row in reader:
             dependency_list.append([Path(row[0]), Path(row[1])])
 
-    file_count = len(file_paths_index)  # 文件数
-    dependency_count = 0  # 依赖数
+    file_count = len(file_paths_index)  # Number of files
+    dependency_count = 0  # Number of dependencies
 
-    # 遍历依赖列表
+    # Traverse dependency list
     for dependency in dependency_list:
-        # 检查依赖的两个文件是否都在file_paths中
+        # Check if both files in the dependency are in file_paths
         i = file_paths_index.get(dependency[0])
         j = file_paths_index.get(dependency[1])
 
         if i is not None and j is not None:
-            # 增加依赖计数并更新依赖矩阵
+            # Increase dependency count and update dependency matrix
             dependency_count += 1
             similarity_matrix[i, j] += 0.5
             similarity_matrix[j, i] += 0.5
@@ -114,21 +114,21 @@ def arch_recovery(directory_path, dependency_file_path, gt_file_path, resolution
 
     partition = community_detection(similarity_matrix, resolution)
 
-    # 创建一个字典来存储按标签分组的文件
+    # Create a dictionary to store files grouped by label
     grouped_files_by_label = {}
-    # 处理文件所属的社区
+    # Process which community each file belongs to
     for node, community in enumerate(partition.membership):
         # print(f"File {node} is in community {community}")
         if community not in grouped_files_by_label:
             grouped_files_by_label[community] = []
-        # 将文件路径添加到对应的标签列表中
+        # Add file path to the corresponding label list
         grouped_files_by_label[community].append(final_paths[node])
 
-    # 创建result文件夹（如果不存在则递归创建）
+    # Create result folder (recursively if it doesn't exist)
     path = Path("result") / project_name
     path.mkdir(parents=True, exist_ok=True)
 
-    # 写入rsf文件
+    # Write to rsf file
     with open(output_rsf_path, 'w') as file:
         for label, files in grouped_files_by_label.items():
             for file_path in files:

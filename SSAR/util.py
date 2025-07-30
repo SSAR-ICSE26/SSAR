@@ -4,16 +4,16 @@ from collections import Counter
 from pathlib import Path
 
 
-# 获取ground-truth中的文件列表
+# Get the list of files from ground-truth
 def read_gt_file(gt_file_path):
     if gt_file_path is None:
         return None
-    # 存储所有文件名
+    # Store all filenames
     gt_file = []
-    # 读取 JSON 数据
+    # Read JSON data
     with open(gt_file_path, 'r') as json_file:
         json_data = json.load(json_file)
-        # 遍历第一层结构
+        # Traverse the first-level structure
         for group in json_data["structure"]:
             for item in group["nested"]:
                 if item["@type"] == "item":
@@ -21,14 +21,14 @@ def read_gt_file(gt_file_path):
 
     return gt_file
 
-# 编程语言及其文件后缀
+# Programming languages and their file extensions
 LANGUAGE_EXTENSIONS = {
     "Java": {".java"},
     "C/C++": {".c", ".cc", ".h", ".cpp", ".cxx", ".hxx", ".hpp"},
     "Python": {".py"}
 }
 
-#  检测编程语言
+# Detect programming language
 def detect_language(project_path):
     project_path = Path(project_path)
     extension_count = Counter()
@@ -37,7 +37,7 @@ def detect_language(project_path):
         if file.is_file():
             extension_count[file.suffix] += 1
 
-    # 统计最多的语言
+    # Count the most frequent language
     language_stats = {lang: sum(extension_count[ext] for ext in exts)
                       for lang, exts in LANGUAGE_EXTENSIONS.items()}
 
@@ -46,13 +46,13 @@ def detect_language(project_path):
     return detected_languages if detected_languages else ["Unknown"]
 
 
-#  读取代码文件
+# Read code file
 def read_code_file(file_path):
     encoding_list = ['utf-8', 'gbk', 'windows-1252', 'ISO-8859-1', 'GB18030', 'GB2312']
-    # 如果文件不存在或者无法访问，直接跳过
+    # If the file does not exist or is inaccessible, skip it directly
     if not Path(file_path).exists():
-        print(f"文件不存在或无法访问: {file_path}")
-        return None, "" # 返回空字符串
+        print(f"File does not exist or is inaccessible: {file_path}")
+        return None, ""  # Return empty string
 
     for encoding in encoding_list:
         try:
@@ -62,16 +62,16 @@ def read_code_file(file_path):
             continue
 
     print(f"Unable to read file: {file_path}")
-    return None, ""  # 读取失败，返回 None
+    return None, ""  # Return None on failure
 
 
-# 提取Java文件中的package路径
+# Extract package path from Java file
 def get_package_name(file_path):
     encoding_list = ['utf-8', 'gbk', 'windows-1252', 'ISO-8859-1', 'GB18030', 'GB2312']
-    # 如果文件不存在或者无法访问，直接跳过
+    # If the file does not exist or is inaccessible, skip it directly
     if not Path(file_path).exists():
-        print(f"文件不存在或无法访问: {file_path}")
-        return None # 返回空字符串
+        print(f"File does not exist or is inaccessible: {file_path}")
+        return None  # Return None
 
     for encoding in encoding_list:
         try:
@@ -82,7 +82,7 @@ def get_package_name(file_path):
                         package_name = match.group(1) + '.' + Path(file_path).stem if match else None
                         return package_name
         except (UnicodeDecodeError, OSError) as e:
-            print(f"读取失败 ({encoding}): {e}")
+            print(f"Failed to read ({encoding}): {e}")
             continue
 
-    return None  # 读取失败，返回 None
+    return None  # Return None on failure
